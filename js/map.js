@@ -35,6 +35,21 @@ CityMap.init();
 
 const DIRS = { up: -COLS, down: COLS, left: -1, right: 1 };
 
+/** Kartensymbol-Sprites (Fußgänger/Autos), gecacht und asynchron nachgeladen */
+const mapSpriteCache = new Map();
+function mapSprite(key) {
+  let e = mapSpriteCache.get(key);
+  if (e) return e;
+  e = { img: new Image(), ready: false };
+  Img.resolve(key).then(u => {
+    if (!u) return;
+    e.img.onload = () => { e.ready = true; };
+    e.img.src = u;
+  });
+  mapSpriteCache.set(key, e);
+  return e;
+}
+
 const MapView = {
   cs: 36,
   base: null, ctx: null, canvas: null,
@@ -189,11 +204,23 @@ const MapView = {
       const pr = cs * (0.62 + 0.1 * Math.sin(t * 4));
       g.strokeStyle = col; g.globalAlpha = 0.55; g.lineWidth = 2; g.beginPath(); g.arc(cx, cy, pr, 0, 7); g.stroke(); g.globalAlpha = 1;
     } else g.globalAlpha = 0.45;
-    g.shadowColor = 'rgba(0,0,0,.8)'; g.shadowBlur = 8;
-    g.fillStyle = col; g.beginPath(); g.arc(cx, cy, cs * 0.34, 0, 7); g.fill();
-    g.shadowBlur = 0; g.lineWidth = 2; g.strokeStyle = '#14110c'; g.stroke();
-    g.font = `bold ${cs * 0.36}px system-ui, sans-serif`; g.fillStyle = '#14110c'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText(String(p.name || '?').trim()[0]?.toUpperCase() || '?', cx, cy + 1);
+    const spr = mapSprite(p.vehicle ? 'map-car-' + p.vehicle : 'map-player');
+    if (spr.ready) {
+      g.shadowColor = 'rgba(0,0,0,.7)'; g.shadowBlur = 6;
+      const h = cs * 1.4, w = h * (spr.img.naturalWidth / spr.img.naturalHeight);
+      g.drawImage(spr.img, cx - w / 2, cy - h / 2, w, h);
+      g.shadowBlur = 0;
+      if (S && S.players && S.players.filter(Boolean).length > 1) {
+        g.beginPath(); g.arc(cx + cs * 0.34, cy - cs * 0.34, cs * 0.15, 0, 7);
+        g.fillStyle = col; g.fill(); g.lineWidth = 1.5; g.strokeStyle = '#14110c'; g.stroke();
+      }
+    } else {
+      g.shadowColor = 'rgba(0,0,0,.8)'; g.shadowBlur = 8;
+      g.fillStyle = col; g.beginPath(); g.arc(cx, cy, cs * 0.34, 0, 7); g.fill();
+      g.shadowBlur = 0; g.lineWidth = 2; g.strokeStyle = '#14110c'; g.stroke();
+      g.font = `bold ${cs * 0.36}px system-ui, sans-serif`; g.fillStyle = '#14110c'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(String(p.name || '?').trim()[0]?.toUpperCase() || '?', cx, cy + 1);
+    }
     g.restore();
   },
   loop(now) {

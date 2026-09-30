@@ -77,6 +77,8 @@ const IMAGE_SLOTS = [];
 
   const vehicles = ['Zu Fuß (Stiefel/Straße)', 'Talbot 90 (1920er-Limousine)', 'Chevy Roadster', 'Buick Century', 'Auburn Modell 120', 'Citroën T.A.'];
   vehicles.forEach((v, i) => add('fahrzeug-' + i, 'Fahrzeuge', v, i === 0 ? 'Ein Paar abgetragene Lederschuhe auf nassem Kopfsteinpflaster, Chicago 1925, dramatisches Licht.' : `${v} von der Seite, freigestellt vor dunklem neutralem Hintergrund, Stil eines Werbeplakats von 1925.`, '4:3'));
+  add('map-player', 'Stadtplan', 'Spielfigur (Kartensymbol)', 'Spielfigur für die Kartenansicht: ein Gangster im dunklen Anzug mit Fedora-Hut und Tommy Gun, von direkt oben gesehen (Vogelperspektive), einfache klare Silhouette, Stil Chicago 1925. Freigestellt (transparenter Hintergrund), kein Text.', '1:1');
+  vehicles.slice(1).forEach((v, i) => add('map-car-' + (i + 1), 'Stadtplan', v + ' (Kartensymbol)', `${v} als Kartensymbol, von direkt oben gesehen (Vogelperspektive), klar erkennbare Silhouette, Stil Chicago 1925. Freigestellt (transparenter Hintergrund), kein Text.`, '1:1'));
 
   const weapons = ['Fäuste', 'Messer', 'Knüppel', 'Kette', 'Wurfstern', 'Revolver', 'Schrotflinte', 'Maschinenpistole (Tommy Gun)', 'Handgranaten'];
   weapons.forEach((w, i) => add('waffe-' + i, 'Waffen', w, `Stillleben: ${w} auf dunklem Holz, Filmnoir-Beleuchtung, freigestellt, Stil 1925.`, '1:1'));

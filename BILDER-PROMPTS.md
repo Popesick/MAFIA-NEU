@@ -179,6 +179,20 @@ Format 4:3
 
 > Citroën T.A. von der Seite, freigestellt vor dunklem neutralem Hintergrund, Stil eines Werbeplakats von 1925.
 
+## Stadtplan-Kartensymbole
+
+Die Spielfigur und Fahrzeuge auf dem Stadtplan (Vogelperspektive statt Seitenansicht wie bei den Fahrzeugbildern oben).
+
+### Spielfigur  `(map-player)`
+Format 1:1
+
+> Spielfigur für die Kartenansicht: ein Gangster im dunklen Anzug mit Fedora-Hut und Tommy Gun, von direkt oben gesehen (Vogelperspektive), einfache klare Silhouette, Stil Chicago 1925. Freigestellt (transparenter Hintergrund), kein Text.
+
+### Talbot 90  `(map-car-1)`, Chevy Roadster `(map-car-2)`, Buick Century `(map-car-3)`, Auburn Modell 120 `(map-car-4)`, Citroën T.A. `(map-car-5)`
+Format 1:1
+
+> [Fahrzeugname] als Kartensymbol, von direkt oben gesehen (Vogelperspektive), klar erkennbare Silhouette, Stil Chicago 1925. Freigestellt (transparenter Hintergrund), kein Text.
+
 ## Waffen
 
 ### Fäuste  `(waffe-0)`
