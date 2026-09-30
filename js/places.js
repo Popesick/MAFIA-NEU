@@ -334,19 +334,12 @@ async function creditEnforce(p, ln, art) {
    6 · Spielhölle
    ============================================================ */
 PLACES[6] = async (p, W, ln, art) => {
-  const x = await UI.menu('Spielhölle', ['„Nimm Platz, mein Freund.“'], ['Poker', 'Black Jack', 'Roulette'], { art, cancel: 'Lieber nicht' });
-  if (!x) return;
-  const bet = await UI.number('Dein Einsatz', [`Du hast ${money(p.cash)}. Wie viel setzt du?`], { min: 0, max: p.trainer ? 1000000 : Math.floor(p.cash), def: Math.min(500, p.trainer ? 500 : Math.floor(p.cash)), step: 100, quick: [100, 500, 1000, 5000], unit: '$', art });
-  if (bet <= 0) return;
-  if (!canPay(p, bet)) return notEnough();
-  spend(p, bet);
-  await UI.say('Am Spieltisch', ['Du gehst zum Spieltisch …'], { art });
-  await sleep(300);
-  if (rnd(1 + x) === 0) {                                           // Gewinnchance 1/(1+x) – Original
-    const P = Math.floor(bet * (0.5 + x));
-    earn(p, P); Sfx.play('fanfare');
-    await UI.say('Gewonnen!', [`Du gewinnst <b>${money(P)}</b>!`], { art, mood: 'good' });
-  } else { Sfx.play('error'); await UI.say('Verloren …', ['Das Haus gewinnt.'], { art, mood: 'bad' }); }
+  for (; ;) {
+    const x = await UI.menu('Spielhölle', ['„Nimm Platz, mein Freund.“', 'Drei Tische, echtes Geld: Poker, Black Jack und Roulette.'], ['Poker', 'Black Jack', 'Roulette'], { art, cancel: 'Lieber nicht' });
+    if (!x) return;
+    if (!p.trainer && p.cash < 10) return notEnough();
+    await [Casino.poker, Casino.blackjack, Casino.roulette][x - 1](p);
+  }
 };
 
 /* ============================================================

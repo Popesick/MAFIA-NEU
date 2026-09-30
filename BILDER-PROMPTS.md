@@ -399,3 +399,27 @@ Format 1:1
 Format 1:1
 
 > Porträt eines Mafia-Bosses im Filmnoir-Stil, Chicago 1925, Anzug mit Weste, Hut, selbstsicherer Blick, Typ 4 (jeweils klar unterscheidbar).
+
+## Casino (Poker, Black Jack, Roulette)
+
+Die drei Minispiele laufen komplett ohne Bilder; die Spielkarten, Jetons und das Roulette-Rad werden im Spiel gezeichnet. Diese Bilder sind optionaler Schmuck.
+
+### Pokertisch  `(casino-poker)`
+Format 16:9
+
+> Pokertisch in einem illegalen Hinterzimmer-Kasino 1925: grüner Filz, Stapel Jetons, Spielkarten im Fächer, Zigarrenrauch, drei Männer im Anzug mit ernsten Gesichtern, schummriges Lampenlicht.
+
+### Black-Jack-Tisch  `(casino-blackjack)`
+Format 16:9
+
+> Black-Jack-Tisch 1925: halbrunder grüner Filztisch, Croupier in Weste und Fliege teilt Karten aus, ein Ass und eine Zehn liegen offen, Jetons, Rauch, warmes Licht.
+
+### Roulette-Tisch  `(casino-roulette)`
+Format 16:9
+
+> Roulette-Tisch in einem Kasino 1925: polierter Holzkessel mit Kugel, Tableau mit Jetons, Croupier mit Rechen, elegante Gäste im Hintergrund, goldenes Licht.
+
+### Kartenrückseite  `(casino-kartenruecken)`
+Format 2:3 (hochkant)
+
+> Rückseite einer Spielkarte im Art-déco-Stil 1925: dunkelrot und Gold, symmetrisches geometrisches Muster mit Rahmen, hochkant, ohne Text.

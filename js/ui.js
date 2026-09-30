@@ -64,6 +64,11 @@ const IMAGE_SLOTS = [];
   };
   for (const [k, [label, pr]] of Object.entries(locs)) add('loc-' + k, 'Orte', label, pr, '16:9');
 
+  add('casino-poker', 'Casino', 'Pokertisch', 'Pokertisch in einem illegalen Hinterzimmer-Kasino 1925: grüner Filz, Stapel Jetons, Spielkarten im Fächer, Zigarrenrauch, drei Männer im Anzug mit ernsten Gesichtern, schummriges Lampenlicht.', '16:9');
+  add('casino-blackjack', 'Casino', 'Black-Jack-Tisch', 'Black-Jack-Tisch 1925: halbrunder grüner Filztisch, Croupier in Weste und Fliege teilt Karten aus, ein Ass und eine Zehn liegen offen, Jetons, Rauch, warmes Licht.', '16:9');
+  add('casino-roulette', 'Casino', 'Roulette-Tisch', 'Roulette-Tisch in einem Kasino 1925: polierter Holzkessel mit Kugel, Tableau mit Jetons, Croupier mit Rechen, elegante Gäste im Hintergrund, goldenes Licht.', '16:9');
+  add('casino-kartenruecken', 'Casino', 'Kartenrückseite', 'Rückseite einer Spielkarte im Art-déco-Stil 1925: dunkelrot und Gold, symmetrisches geometrisches Muster mit Rahmen, hochkant, ohne Text.', '2:3');
+
   const vehicles = ['Zu Fuß (Stiefel/Straße)', 'Talbot 90 (1920er-Limousine)', 'Chevy Roadster', 'Buick Century', 'Auburn Modell 120', 'Citroën T.A.'];
   vehicles.forEach((v, i) => add('fahrzeug-' + i, 'Fahrzeuge', v, i === 0 ? 'Ein Paar abgetragene Lederschuhe auf nassem Kopfsteinpflaster, Chicago 1925, dramatisches Licht.' : `${v} von der Seite, freigestellt vor dunklem neutralem Hintergrund, Stil eines Werbeplakats von 1925.`, '4:3'));
 
