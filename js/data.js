@@ -39,7 +39,7 @@ const BUILDINGS = {
   1:  { key: 'motel',    name: 'Unterschlupf',           icon: '🏨', hue: 28,  tint: '#8a5a2b',
         title: 'Unterschlupf (schäbiges Motel / Mietshaus)',
         greet: '„Ah, ein Kunde! Was kann ich für Sie tun?“',
-        opts: ['„Eine Wohnung – aber dalli, Junge! Und keinen Ärger, klar?“', '„Ich möchte meine Miete zahlen!“', '„Das geht Sie nichts an!“'] },
+        opts: ['„Eine Wohnung – aber dalli, Junge! Und keinen Ärger, klar?“', '„Ich möchte meine Miete zahlen!“', 'Ausruhen (alle Gangster erholen sich)', '„Das geht Sie nichts an!“'] },
   2:  { key: 'pub',      name: 'Kneipe',                 icon: '🍺', hue: 38,  tint: '#8b5e1a',
         title: 'Kneipe / Bar (eine zwielichtige Spelunke)',
         greet: '„Eh, Amigo – willste Milch, oder darf’s was anderes sein?“',

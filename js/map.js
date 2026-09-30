@@ -3,6 +3,7 @@
    ============================================================ */
 
 const COLS = 40, ROWS = 25;
+const VIEW_COLS = 16, VIEW_ROWS = 10;
 const cellOf = (r, c) => r * COLS + c;
 
 const CityMap = {
@@ -38,11 +39,11 @@ const MapView = {
   cs: 36,
   base: null, ctx: null, canvas: null,
   player: null, hover: -1, path: [], raf: 0, t0: performance.now(), visible: false,
-  hilite: null,
+  hilite: null, camR: 0, camC: 0,
 
   init() {
     this.canvas = $('#map');
-    this.canvas.width = COLS * this.cs; this.canvas.height = ROWS * this.cs;
+    this.canvas.width = VIEW_COLS * this.cs; this.canvas.height = VIEW_ROWS * this.cs;
     this.ctx = this.canvas.getContext('2d');
     this.buildBase();
     this.canvas.addEventListener('mousemove', e => { this.hover = this.cellAt(e); });
@@ -50,10 +51,22 @@ const MapView = {
     this.canvas.addEventListener('click', e => this.onClick(this.cellAt(e)));
     document.addEventListener('imgchange', () => { });
   },
+  /** Kamera-Ausschnitt (oben links, in Zellen), zentriert auf 'pos' und ans Kartenende geklemmt */
+  camFor(pos) {
+    const r = Math.floor(pos / COLS), c = pos % COLS;
+    return {
+      camR: Math.max(0, Math.min(ROWS - VIEW_ROWS, r - (VIEW_ROWS >> 1))),
+      camC: Math.max(0, Math.min(COLS - VIEW_COLS, c - (VIEW_COLS >> 1))),
+    };
+  },
+  inView(i) {
+    const r = Math.floor(i / COLS), c = i % COLS;
+    return r >= this.camR && r < this.camR + VIEW_ROWS && c >= this.camC && c < this.camC + VIEW_COLS;
+  },
   cellAt(e) {
     const r = this.canvas.getBoundingClientRect();
-    const x = Math.floor((e.clientX - r.left) / r.width * COLS), y = Math.floor((e.clientY - r.top) / r.height * ROWS);
-    return x < 0 || y < 0 || x >= COLS || y >= ROWS ? -1 : cellOf(y, x);
+    const x = Math.floor((e.clientX - r.left) / r.width * VIEW_COLS), y = Math.floor((e.clientY - r.top) / r.height * VIEW_ROWS);
+    return x < 0 || y < 0 || x >= VIEW_COLS || y >= VIEW_ROWS ? -1 : cellOf(y + this.camR, x + this.camC);
   },
 
   /* ---------- statische Ebene ---------- */
@@ -107,22 +120,28 @@ const MapView = {
   draw(now) {
     if (!this.visible) return;
     const g = this.ctx, cs = this.cs, t = (now - this.t0) / 1000;
-    g.drawImage(this.base, 0, 0);
+    const P = this.player;
+    const { camR, camC } = this.camFor(P ? P.pos : 0);
+    this.camR = camR; this.camC = camC;
+    g.drawImage(this.base, camC * cs, camR * cs, VIEW_COLS * cs, VIEW_ROWS * cs, 0, 0, VIEW_COLS * cs, VIEW_ROWS * cs);
     // Eingänge
     g.textAlign = 'center'; g.textBaseline = 'middle';
-    for (const [i, d] of CityMap.door) this.drawBadge(i, BUILDINGS[d.la], this.hilite === d.la);
+    for (const [i, d] of CityMap.door) { if (this.inView(i)) this.drawBadge(i, BUILDINGS[d.la], this.hilite === d.la); }
     // Sonderziele
-    const P = this.player;
-    if (P && P.tip === 3) this.drawBadge(CELL_TRANSPORT, BUILDINGS[13], true, t);
-    if (P && P.tip === 5) this.drawBadge(CELL_MAYOR, BUILDINGS[14], true, t);
+    if (P && P.tip === 3 && this.inView(CELL_TRANSPORT)) this.drawBadge(CELL_TRANSPORT, BUILDINGS[13], true, t);
+    if (P && P.tip === 5 && this.inView(CELL_MAYOR)) this.drawBadge(CELL_MAYOR, BUILDINGS[14], true, t);
     // Pfadvorschau
     if (this.path.length) {
       g.fillStyle = 'rgba(227,169,79,.35)';
-      for (const p of this.path) { const r = Math.floor(p / COLS), c = p % COLS; g.beginPath(); g.arc(c * cs + cs / 2, r * cs + cs / 2, cs * 0.14, 0, 7); g.fill(); }
+      for (const p of this.path) {
+        if (!this.inView(p)) continue;
+        const r = Math.floor(p / COLS) - camR, c = (p % COLS) - camC;
+        g.beginPath(); g.arc(c * cs + cs / 2, r * cs + cs / 2, cs * 0.14, 0, 7); g.fill();
+      }
     }
     // Hover
-    if (this.hover >= 0) {
-      const r = Math.floor(this.hover / COLS), c = this.hover % COLS;
+    if (this.hover >= 0 && this.inView(this.hover)) {
+      const r = Math.floor(this.hover / COLS) - camR, c = (this.hover % COLS) - camC;
       const ok = CityMap.walkable(this.hover, P) || (CityMap.target(this.hover, P || {}) != null);
       g.strokeStyle = ok ? 'rgba(227,169,79,.9)' : 'rgba(200,200,200,.25)'; g.lineWidth = 2;
       g.strokeRect(c * cs + 2, r * cs + 2, cs - 4, cs - 4);
@@ -130,14 +149,14 @@ const MapView = {
     // andere Spieler (blass) und aktueller Spieler
     if (S && S.players) {
       S.players.forEach((q, n) => {
-        if (!q || q === P) return;
+        if (!q || q === P || !this.inView(q.pos)) return;
         this.drawToken(q.pos, q, false, t, n);
       });
     }
-    if (P) this.drawToken(P.pos, P, true, t, P.idx);
+    if (P && this.inView(P.pos)) this.drawToken(P.pos, P, true, t, P.idx);
   },
   drawBadge(i, b, glow, t = 0) {
-    const g = this.ctx, cs = this.cs, r = Math.floor(i / COLS), c = i % COLS, cx = c * cs + cs / 2, cy = r * cs + cs / 2;
+    const g = this.ctx, cs = this.cs, r = Math.floor(i / COLS) - this.camR, c = (i % COLS) - this.camC, cx = c * cs + cs / 2, cy = r * cs + cs / 2;
     const pulse = glow && t ? 1 + Math.sin(t * 5) * 0.08 : 1;
     g.save();
     g.shadowColor = glow ? 'rgba(255,200,90,.9)' : 'rgba(0,0,0,.6)'; g.shadowBlur = glow ? 14 : 5;
@@ -148,7 +167,7 @@ const MapView = {
     g.fillStyle = '#fff'; g.fillText(b.icon, cx, cy + cs * 0.04);
   },
   drawToken(i, p, active, t, n) {
-    const g = this.ctx, cs = this.cs, r = Math.floor(i / COLS), c = i % COLS, cx = c * cs + cs / 2, cy = r * cs + cs / 2;
+    const g = this.ctx, cs = this.cs, r = Math.floor(i / COLS) - this.camR, c = (i % COLS) - this.camC, cx = c * cs + cs / 2, cy = r * cs + cs / 2;
     const col = ['', '#e3a94f', '#5fb0e6', '#c86ad8', '#6fd08a'][p.idx] || '#e3a94f';
     g.save();
     if (active) {

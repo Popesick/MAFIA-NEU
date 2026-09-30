@@ -25,6 +25,13 @@ function pickCards(title, intro, cards, { art, cancel = 'Zurück', wide = true }
    1 · Unterschlupf
    ============================================================ */
 PLACES[1] = async (p, W, ln, art) => {
+  if (W === 3) {
+    if (S.flats[ln] !== p.idx) return UI.say('Unterschlupf', ['„Sie wohnen hier gar nicht!“'], { art, mood: 'bad' });
+    S.ms -= 5;
+    p.gangsters.forEach(g => g.en = maxEnergy(g));
+    Sfx.play('ok');
+    return UI.say('Ausgeruht', ['Die ganze Bande legt sich ein paar Stunden hin – die Energie aller Gangster ist wieder voll aufgefüllt.'], { art, mood: 'good' });
+  }
   if (W === 2) {
     if (S.flats[ln] !== p.idx) return UI.say('Unterschlupf', ['„Sie wohnen hier gar nicht!“'], { art, mood: 'bad' });
   } else if (S.flats[ln] !== 0) return UI.say('Unterschlupf', ['„Nichts frei!“'], { art });
