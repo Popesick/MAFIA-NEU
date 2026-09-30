@@ -14,6 +14,10 @@ python3 -m http.server 8000
 
 und dann <http://localhost:8000> öffnen.
 
+## Musik
+
+Der Titelsong „Painted Green“ (mit Gesang) läuft in Dauerschleife auf dem Titelbild; im Spiel läuft eine zufällige, instrumentale Playlist (`assets/audio/music-1..4.mp3`) im Hintergrund weiter. Musik lässt sich unabhängig vom Ton-Effekt-Schalter separat aus- und die Lautstärke einstellen – auf dem Titelbild über den Link „Musik“, im Spiel über das Menü (☰ → „Musik-Einstellungen“).
+
 ## Spielhölle
 
 Die Spielhölle enthält drei echte Minispiele mit dem Geld des Spielers (im Trainer-Modus unendlich):

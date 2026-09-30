@@ -101,14 +101,15 @@ async function gameMenu() {
   for (;;) {
     const c = await UI.menu('Menü', [], [
       { label: 'Spiel speichern', sub: 'Wird zu Beginn jedes Zuges auch automatisch gespeichert.' },
-      { label: 'Ton: ' + (Sfx.enabled ? 'an' : 'aus') }, { label: 'Bilder verwalten' }, { label: 'Spielanleitung' }, { label: 'Zum Titelbild (Spiel bleibt gespeichert)' },
+      { label: 'Ton: ' + (Sfx.enabled ? 'an' : 'aus') }, { label: 'Musik-Einstellungen' }, { label: 'Bilder verwalten' }, { label: 'Spielanleitung' }, { label: 'Zum Titelbild (Spiel bleibt gespeichert)' },
     ], { cancel: 'Zurück zum Spiel' });
     if (!c) return;
     if (c === 1) { saveGame(); toast('Gespeichert'); }
     if (c === 2) { toggleSound(); }
-    if (c === 3) await showImageManager();
-    if (c === 4) await showHelp();
-    if (c === 5) { saveGame(); location.reload(); return; }
+    if (c === 3) await showMusicSettings();
+    if (c === 4) await showImageManager();
+    if (c === 5) await showHelp();
+    if (c === 6) { saveGame(); location.reload(); return; }
   }
 }
 
@@ -176,6 +177,7 @@ function buildTrainerPanel() {
    ============================================================ */
 window.addEventListener('DOMContentLoaded', async () => {
   try { Sfx.enabled = localStorage.getItem('mafia-neu-sound') !== '0'; } catch (e) { }
+  Music.init();
   await Img.init();
   MapView.init(); Arena.init(); initMapInput();
   // Legende
@@ -185,6 +187,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('#btn-help').addEventListener('click', showHelp);
   $('#btn-images').addEventListener('click', showImageManager);
   $('#btn-sound').addEventListener('click', toggleSound);
+  $('#btn-music').addEventListener('click', showMusicSettings);
   $('#btn-menu').addEventListener('click', gameMenu);
   $('#btn-hudsound').addEventListener('click', toggleSound);
   $('#btn-trainer').addEventListener('click', toggleTrainerPanel);

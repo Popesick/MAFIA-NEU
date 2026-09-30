@@ -94,6 +94,8 @@ function showView(name) {
 }
 function showScreen(name) {
   ['title', 'setup', 'game'].forEach(v => $('#screen-' + v).classList.toggle('hidden', v !== name));
+  if (name === 'title') Music.playTitle();
+  else if (name === 'game') Music.playGame();
 }
 
 /* ============================================================
