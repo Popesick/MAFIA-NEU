@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MAFIA – Chicago 1925</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ Titelbild ============ -->
+  <section id="screen-title" class="screen">
+    <div class="title-bg" id="title-bg"></div>
+    <div class="title-inner">
+      <div class="title-kicker">Igelsoft 1986 · neu aufgelegt</div>
+      <h1 class="title-logo">MAFIA</h1>
+      <div class="title-sub">Chicago · 1925</div>
+      <p class="title-tag">Baue als Gangsterboss deine Bande auf – für 1 bis 4 Spieler an einem Rechner.</p>
+      <div class="title-actions">
+        <button class="btn primary big" id="btn-new">Neues Spiel</button>
+        <button class="btn big hidden" id="btn-continue">Spiel fortsetzen</button>
+      </div>
+      <div class="title-links">
+        <button class="linkbtn" id="btn-help">Spielanleitung</button>
+        <button class="linkbtn" id="btn-images">Bilder verwalten</button>
+        <button class="linkbtn" id="btn-sound">Ton: an</button>
+      </div>
+      <p class="title-note">Tipp zum Testen: Wer sich <b>„Trainer“</b> nennt, bekommt unendlich Geld.</p>
+    </div>
+  </section>
+
+  <!-- ============ Setup ============ -->
+  <section id="screen-setup" class="screen hidden">
+    <div class="setup-wrap"><div id="setup-body"></div></div>
+  </section>
+
+  <!-- ============ Spiel ============ -->
+  <section id="screen-game" class="screen hidden">
+    <header id="hud">
+      <div class="hud-brand">MAFIA<small>Chicago 1925</small></div>
+      <div class="hud-player">
+        <div id="hud-players"></div>
+        <b id="hud-name">–</b><small id="hud-gang">–</small>
+      </div>
+      <div class="hud-stat"><label>Kapital</label><b id="hud-cash" class="gold">–</b></div>
+      <div class="hud-stat"><label>Datum</label><b id="hud-date">–</b></div>
+      <div class="hud-stat score"><label>Rang: <span id="hud-rank">–</span></label>
+        <div class="bar"><i id="hud-score-fill"></i></div><small id="hud-score-num"></small></div>
+      <div class="hud-stat"><label>Fahrzeug</label><b id="hud-veh">–</b>
+        <div class="bar thin"><i id="hud-ms-fill"></i></div><small><span id="hud-ms">0</span> Bewegungspunkte</small></div>
+      <div class="hud-actions">
+        <button class="iconbtn hidden" id="btn-trainer" title="Trainer-Panel">🛠</button>
+        <button class="iconbtn" id="btn-hudsound" title="Ton an/aus">🔊</button>
+        <button class="iconbtn" id="btn-menu" title="Menü">☰</button>
+      </div>
+    </header>
+
+    <div id="game-main">
+      <main id="stage">
+        <div id="view-menu" class="view"></div>
+
+        <div id="view-map" class="view hidden">
+          <div class="view-bar">
+            <div><b>Stadtplan</b> <span class="muted">· Klick aufs Ziel, WASD oder Pfeiltasten · Gebäude betritt man, indem man hineinläuft</span></div>
+            <div class="view-bar-r"><span class="ms-pill"><b id="map-ms">0</b> Bewegungspunkte</span>
+              <button class="btn small" id="map-exit">Stadtplan verlassen (Esc)</button></div>
+          </div>
+          <div class="canvas-wrap"><canvas id="map"></canvas></div>
+          <div class="legend" id="legend"></div>
+          <div class="dpad" id="map-dpad">
+            <button data-d="up">▲</button><button data-d="left">◀</button><button data-d="down">▼</button><button data-d="right">▶</button>
+          </div>
+        </div>
+
+        <div id="view-battle" class="view hidden">
+          <div class="view-bar">
+            <div><b id="arena-title">Kampf</b> <span class="muted" id="arena-sub"></span></div>
+            <div id="arena-sides"></div>
+          </div>
+          <div class="canvas-wrap"><canvas id="arena"></canvas></div>
+          <div class="arena-info" id="arena-info"></div>
+          <div class="battle-controls" id="battle-controls">
+            <button class="btn" id="btn-fire">🔫 Feuer (F)</button>
+            <button class="btn" id="btn-pass">⏳ Warten (Leertaste)</button>
+            <div class="dpad inline" id="battle-dpad">
+              <button data-dr="-1" data-dc="0">▲</button><button data-dr="0" data-dc="-1">◀</button><button data-dr="1" data-dc="0">▼</button><button data-dr="0" data-dc="1">▶</button>
+            </div>
+            <button class="btn ghost" id="btn-quit">🏳️ Aufgeben (Q)</button>
+          </div>
+          <p class="hint" id="arena-hint">Schritt: WASD / Pfeile oder Nachbarfeld klicken · Feuer: F · Warten: Leertaste</p>
+        </div>
+      </main>
+
+      <aside id="game-side">
+        <h3>Deine Bande</h3>
+        <div id="roster"></div>
+        <h3>Besitz &amp; Notizen</h3>
+        <div id="inventory" class="inventory"></div>
+      </aside>
+    </div>
+
+    <footer id="logbar"><div id="log"></div></footer>
+
+    <!-- Trainer-Panel -->
+    <aside id="trainer-panel" class="hidden"></aside>
+  </section>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script src="js/mapdata.js"></script>
+<script src="js/data.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/map.js"></script>
+<script src="js/battle.js"></script>
+<script src="js/game.js"></script>
+<script src="js/events.js"></script>
+<script src="js/places.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
