@@ -3,7 +3,7 @@
    ============================================================ */
 
 const COLS = 40, ROWS = 25;
-const VIEW_COLS = 16, VIEW_ROWS = 10;
+const VIEW_COLS = 24, VIEW_ROWS = 15;
 const cellOf = (r, c) => r * COLS + c;
 
 const CityMap = {
