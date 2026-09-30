@@ -68,6 +68,12 @@ const IMAGE_SLOTS = [];
   add('casino-blackjack', 'Casino', 'Black-Jack-Tisch', 'Black-Jack-Tisch 1925: halbrunder grüner Filztisch, Croupier in Weste und Fliege teilt Karten aus, ein Ass und eine Zehn liegen offen, Jetons, Rauch, warmes Licht.', '16:9');
   add('casino-roulette', 'Casino', 'Roulette-Tisch', 'Roulette-Tisch in einem Kasino 1925: polierter Holzkessel mit Kugel, Tableau mit Jetons, Croupier mit Rechen, elegante Gäste im Hintergrund, goldenes Licht.', '16:9');
   add('casino-kartenruecken', 'Casino', 'Kartenrückseite', 'Rückseite einer Spielkarte im Art-déco-Stil 1925: dunkelrot und Gold, symmetrisches geometrisches Muster mit Rahmen, hochkant, ohne Text.', '2:3');
+  add('train-range-bg', 'Training', 'Schießstand (Hintergrund)', 'Innen-Schießstand der Gangsterbande 1925 aus der Sicht des Schützen: Holzbalken, Schiene an der Decke, freie dunkle Wand in der Mitte, Sandsäcke, Hängelampen, Holzbrüstung im Vordergrund. Keine Personen.', '16:9');
+  for (let i = 1; i <= 3; i++) add('train-target-' + i, 'Training', 'Zielfigur ' + i + ' (transparent)', 'Schießbuden-Zielfigur: flache, bemalte Holz-Silhouette eines Gangsters in Ganzkörper-Frontalansicht mit Schlapphut, Maschinenpistole quer vor der Brust, roter Zielring auf der Brust. Freigestellt (transparenter Hintergrund). Variante ' + i + '.', '1:2');
+  add('train-camp-bg', 'Training', 'Trainingslager (Hintergrund)', 'Straße in Chicago 1925 in der Abenddämmerung, frontal ein dreistöckiges Backsteinhaus mit 3 x 3 gleichmäßig verteilten dunklen Fenstern, Kopfsteinpflaster im Vordergrund frei. Keine Personen.', '16:9');
+  for (let i = 1; i <= 3; i++) add('train-enemy-' + i, 'Training', 'Fenster-Gangster ' + i + ' (transparent)', 'Realistisch gemalter Gangster als Halbfigur, lehnt aus einem Fenster und zielt mit einer Maschinenpistole auf den Betrachter. Freigestellt (transparenter Hintergrund). Variante ' + i + '.', '1:1');
+  add('train-player-cover', 'Training', 'Spieler in Deckung (transparent)', 'Gangster von hinten, kauert hinter einer Barrikade aus Sandsäcken und Kisten, nur Hut und Schultern sichtbar. Freigestellt (transparenter Hintergrund).', '4:3');
+  add('train-player-shoot', 'Training', 'Spieler in Schussposition (transparent)', 'Derselbe Gangster von hinten, hinter derselben Barrikade aufgerichtet, Arm mit Pistole nach vorn ausgestreckt. Freigestellt (transparenter Hintergrund), Barrikade wie im Deckungsbild.', '4:3');
 
   const vehicles = ['Zu Fuß (Stiefel/Straße)', 'Talbot 90 (1920er-Limousine)', 'Chevy Roadster', 'Buick Century', 'Auburn Modell 120', 'Citroën T.A.'];
   vehicles.forEach((v, i) => add('fahrzeug-' + i, 'Fahrzeuge', v, i === 0 ? 'Ein Paar abgetragene Lederschuhe auf nassem Kopfsteinpflaster, Chicago 1925, dramatisches Licht.' : `${v} von der Seite, freigestellt vor dunklem neutralem Hintergrund, Stil eines Werbeplakats von 1925.`, '4:3'));
@@ -190,6 +196,7 @@ const Sfx = {
       case 'hit': this.tone(220, 0.1, 'sawtooth', 0.07, -90); break;
       case 'miss': this.noise(0.08, 0.05, 2500); break;
       case 'kill': this.tone(300, 0.35, 'sawtooth', 0.07, -240); break;
+      case 'reload': this.tone(700, 0.04, 'square', 0.05); this.tone(420, 0.05, 'square', 0.05, 0, 0.12); this.noise(0.05, 0.08, 2500, 0.2); break;
       case 'tick': this.tone(1500, 0.02, 'square', 0.03); break;
       case 'lock': this.tone(880, 0.05, 'square', 0.05); this.tone(1320, 0.12, 'square', 0.05, 0, 0.05); break;
       case 'alarm': for (let i = 0; i < 4; i++) { this.tone(880, 0.12, 'square', 0.05, 0, i * 0.25); this.tone(660, 0.12, 'square', 0.05, 0, i * 0.25 + 0.12); } break;

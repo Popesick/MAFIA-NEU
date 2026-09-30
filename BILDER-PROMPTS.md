@@ -423,3 +423,26 @@ Format 16:9
 Format 2:3 (hochkant)
 
 > Rückseite einer Spielkarte im Art-déco-Stil 1925: dunkelrot und Gold, symmetrisches geometrisches Muster mit Rahmen, hochkant, ohne Text.
+
+## Training beim Waffenhändler (Schießstand und Trainingslager)
+
+Alle Figuren werden als **Sprite-Sheet auf einfarbigem Grün (#00FF00)** generiert und lokal per Chroma-Key freigestellt und zerschnitten (kein echter Alpha-Kanal von ChatGPT nötig). Die Figuren sind als `.webp` mit Transparenz abzulegen.
+
+### Schießstand-Hintergrund  `(train-range-bg)`
+Format 16:9
+
+> Innenansicht eines Schießstands 1925 im Filmnoir-Stil: lange Halle mit Holzbalken, Sandsäcke, Lampen mit warmem Licht, leere Bahn in der Mitte, keine Personen.
+
+### Zielfiguren  `(train-target-1 … 3)`  (transparent)
+Hochkant, freigestellt. Derzeit lokal aus `train-enemy-*` abgeleitet; ein ChatGPT-Sheet („Jahrmarkts-Pappaufsteller“ mit Maschinenpistole, drei Varianten auf Grün) kann sie ersetzen.
+
+### Trainingslager-Hintergrund  `(train-camp-bg)`
+Format 16:9
+
+> Straßenzug in Chicago 1925 bei Abenddämmerung, mittig ein dreistöckiges Backsteinhaus mit 3×3 dunklen, leeren Fenstern, Laternen, Pflaster, keine Personen. Die Fensterpositionen sind in `js/training.js` (`CAMP_WINDOWS`) kalibriert; bei neuem Bild dort anpassen.
+
+### Gangster in den Fenstern  `(train-enemy-1 … 3)`  (transparent)
+> Drei verschiedene Gangster 1925 mit Maschinenpistole (keine Zielscheiben), Halbfigur, Sprite-Sheet auf Grün #00FF00.
+
+### Spieler  `(train-player-cover, train-player-shoot)`  (transparent)
+> Gangster von hinten hinter Sandsäcken/Kisten in Deckung (`cover`) und aus der Deckung feuernd mit Pistole (`shoot`), gleiche Figur, Sprite-Sheet auf Grün.

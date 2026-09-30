@@ -195,29 +195,45 @@ async function weaponTrain(p, ln, art) {
     const c = await UI.menu('Training', ['Was soll es sein?'], ['Schießstand', 'Trainingslager'], { art });
     if (!c) return; camp = c === 2;
   }
-  if (!camp) {
-    const price = 800 + 200 * p.rank;
-    const ok = await UI.yesno('Schießstand', [`Das macht <b>${money(price)}</b>.`, 'Kraft +5, Intelligenz +3, Brutalität +2 (je nach Laden mehr).'], { art });
-    if (!ok) return;
-    if (!canPay(p, price)) return notEnough();
-    spend(p, price);
-    g.pow = Math.min(99, g.pow + 5);
-    g.int = Math.min(99, g.int + 3 + (ln === 1 ? 2 : 0));
-    g.brut = Math.min(99, g.brut + 2 + (ln === 2 ? 3 : 0));
-    addScore(p, 1); Sfx.play('ok'); refresh();
-    await UI.say('Schießstand', [`${esc(g.name)} besucht einen Schießstand.`, 'Die Werte sind gestiegen.'], { art, mood: 'good' });
+  const price = camp ? 2500 + 500 * p.rank : 800 + 200 * p.rank;
+  const title = camp ? 'Trainingslager' : 'Schießstand';
+  const how = await UI.menu(title, [`Das macht <b>${money(price)}</b>.`,
+    camp ? 'Alle Werte steigen kräftig (je +8 bis +15).' : 'Kraft +5, Intelligenz +3, Brutalität +2 (je nach Laden mehr).',
+    '<b>Selber trainieren</b> ist ein Minispiel: Je besser du bist, desto größer der Erfolg (0–100 %).'],
+  [{ label: 'Automatisch trainieren', sub: 'Immer der volle Erfolg' }, { label: 'Selber trainieren', sub: camp ? 'Minispiel: 30 Gangster im Haus' : 'Minispiel: 30 Zielscheiben' }],
+  { art, cancel: 'Lieber nicht' });
+  if (!how) return;
+  if (!canPay(p, price)) return notEnough();
+
+  let f = 1;                                                   // Anteil des maximalen Trainingserfolgs
+  if (how === 2) {
+    if (!camp) spend(p, price);
+    else { await UI.say(title, [`${esc(g.name)} besucht ein Trainingslager …`, `Du sitzt selbst hinter der Deckung – <b>${g.en}</b> Lebenspunkte, genau wie ${esc(g.name)}.`], { art }); spend(p, price); }
+    refresh();
+    const r = camp ? await Training.camp(g) : await Training.range(g);
+    f = r.hits / r.total;
+    const pct = Math.round(f * 100);
+    await UI.say(title, [`<b>${r.hits} von ${r.total}</b> Zielen getroffen – ${pct} % des möglichen Trainingserfolgs.`], { art, mood: f >= 0.5 ? 'good' : undefined });
   } else {
-    const price = 2500 + 500 * p.rank;
-    const ok = await UI.yesno('Trainingslager', [`Das macht <b>${money(price)}</b>.`, 'Alle Werte steigen kräftig (je +8 bis +15).'], { art });
-    if (!ok) return;
-    if (!canPay(p, price)) return notEnough();
-    await UI.say('Trainingslager', [`${esc(g.name)} besucht ein Trainingslager …`], { art });
+    if (camp) await UI.say(title, [`${esc(g.name)} besucht ein Trainingslager …`], { art });
     spend(p, price);
-    const r8 = () => rnd(8) + 8;                                // Original: FN28
-    g.int = Math.min(99, g.int + r8()); g.brut = Math.min(99, g.brut + r8()); g.pow = Math.min(99, g.pow + r8());
-    addScore(p, 2); Sfx.play('ok'); refresh();
-    await UI.say('Trainingslager', ['Da ist er (bzw. sie) wieder – stärker denn je!'], { art, mood: 'good' });
   }
+  const part = n => Math.round(n * f);
+  const before = { pow: g.pow, int: g.int, brut: g.brut };
+  if (!camp) {
+    g.pow = Math.min(99, g.pow + part(5));
+    g.int = Math.min(99, g.int + part(3 + (ln === 1 ? 2 : 0)));
+    g.brut = Math.min(99, g.brut + part(2 + (ln === 2 ? 3 : 0)));
+    if (f >= 0.5) addScore(p, 1);
+  } else {
+    const r8 = () => rnd(8) + 8;                                // Original: FN28
+    g.int = Math.min(99, g.int + part(r8())); g.brut = Math.min(99, g.brut + part(r8())); g.pow = Math.min(99, g.pow + part(r8()));
+    if (f >= 0.5) addScore(p, 2);
+  }
+  Sfx.play('ok'); refresh();
+  const d = [`Kraft +${g.pow - before.pow}`, `Intelligenz +${g.int - before.int}`, `Brutalität +${g.brut - before.brut}`].join(', ');
+  if (how === 2) await UI.say(title, [`${esc(g.name)}: ${d}.`], { art, mood: 'good' });
+  else await UI.say(title, camp ? ['Da ist er (bzw. sie) wieder – stärker denn je!'] : [`${esc(g.name)} besucht einen Schießstand.`, 'Die Werte sind gestiegen.'], { art, mood: 'good' });
 }
 
 /* ============================================================
