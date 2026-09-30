@@ -28,8 +28,8 @@ Karten, Jetons und Rad werden im Spiel gezeichnet. Die Tischbilder `casino-poker
 
 Beim Waffenhändler (Schießtraining und Trainingslager) gibt es neben „Automatisch trainieren“ (voller Erfolg) die Option **„Selber trainieren“** als Minispiel. Der Erfolg wird anteilig (0–100 %) nach Treffern berechnet:
 
-- **Schießstand** – 30 Pappkameraden huschen immer schneller von links nach rechts über einen Schießstand. Fadenkreuz mit der Maus, alle 6 Schuss Nachladen mit kurzer Pause.
-- **Trainingslager** – Der Spieler sitzt mit den Lebenspunkten des Gangsters hinter einer Deckung vor einem Haus; in den Fenstern tauchen 30 Gangster auf und schießen nach 2–4 s. Wer schießt, verlässt die Deckung und ist verwundbar (Mündungsfeuer mit Sound, Nachladen nach 6 Schuss in 2 s). Ein Treffer kostet 2–5 Lebenspunkte; bei 0 ist das Spiel vorbei.
+- **Schießstand** – 30 Pappkameraden huschen schnell über einen Schießstand und werden mit jedem Ziel schneller; ab dem 10. Ziel fliegen sie zufällige Kurven, ab dem 20. kommen sie auch von rechts ins Bild. Fadenkreuz mit der Maus, alle 6 Schuss Nachladen mit kurzer Pause.
+- **Trainingslager** – Der Spieler sitzt mit den Lebenspunkten des Gangsters hinter einer Deckung vor einem Haus; in den Fenstern tauchen 40 Gangster auf und schießen nach 1–3 s (ab dem 30. Gegner nur noch 1–2 s). Ab dem 20. Gegner tauchen sie deutlich häufiger auf, teils bis zu drei gleichzeitig. Wer schießt, verlässt die Deckung und ist verwundbar (Mündungsfeuer mit Sound, Nachladen nach 6 Schuss in 2 s). Ein Treffer kostet 2–5 Lebenspunkte; bei 0 ist das Spiel vorbei. Beide Minispiele füllen das Fenster fast komplett aus; per Knopf „⛶ Vollbild“ auch echter Vollbildmodus.
 
 Die Figuren `train-target-1..3` sind lokal aus den Gangster-Sprites `train-enemy-1..3` abgeleitet (Pappaufsteller-Look), nicht separat generiert.
 

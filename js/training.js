@@ -1,14 +1,14 @@
 /* ============================================================
    Trainings-Minispiele beim Waffenhändler ("Selber trainieren"):
-   - Training.range(g)  Schießstand: 30 Ziele huschen von links nach rechts
-   - Training.camp(g)   Trainingslager: 30 Gangster in den Fenstern eines Hauses
+   - Training.range(g)  Schießstand: 30 Ziele huschen schnell über die Bahn (ab Ziel 10 Kurven, ab Ziel 20 auch von rechts)
+   - Training.camp(g)   Trainingslager: 40 Gangster in den Fenstern eines Hauses (wird ab Gegner 20/30 härter)
    Beide liefern { hits, total, ended } zurück; die Belohnung berechnet places.js.
    Bildplätze: train-range-bg, train-target-1..3, train-camp-bg, train-enemy-1..3,
    train-player-cover, train-player-shoot (fehlt ein Bild, gibt es Platzhalter).
    ============================================================ */
 
 const Training = (() => {
-  const TOTAL = 30;
+  const RANGE_N = 30, CAMP_N = 40;
   const MAG = 6;
   const rf = (a, b) => a + Math.random() * (b - a);
   const pickOf = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -40,6 +40,13 @@ const Training = (() => {
     stage.append(bg, layer, flash, cross, banner);
     const hud = el('div', { class: 'tr-hud' });
     const hint = el('div', { class: 'tr-hint muted', html: cfg.hint });
+    const fsBtn = el('button', { class: 'tr-fsbtn', type: 'button', title: 'Vollbild ein/aus', onclick: e => {
+      e.preventDefault(); e.stopPropagation();
+      const m = root.closest('.modal');
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      else if (m && m.requestFullscreen) m.requestFullscreen().catch(() => {});
+    } }, '⛶ Vollbild');
+
     const root = el('div', { class: 'tr' }, hud, stage, hint);
     Img.resolve(cfg.bg).then(u => { if (u) { bg.style.backgroundImage = `url("${u}")`; stage.classList.add('has-bg'); } });
 
@@ -66,9 +73,10 @@ const Training = (() => {
     await UI.scene({
       wide: true, title: cfg.title, body: [root], noFocus: true,
       actions: [{ label: 'Training beenden', value: 'quit', kind: 'ghost' }],
-      onMount: (sheet, done) => { game = build(api, () => setTimeout(done, 2200)); game.start(); },
+      onMount: (sheet, done) => { sheet.classList.add('tr-fs'); game = build(api, () => setTimeout(done, 2200)); hud.append(fsBtn); game.start(); },
     });
     game.stop();
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     return game.result();
   }
 
@@ -78,14 +86,14 @@ const Training = (() => {
   function range(g) {
     return arena({
       cls: 'range', title: '🎯 Schießstand – Selber trainieren', bg: 'train-range-bg',
-      hint: 'Mit der Maus zielen, <b>Klick</b> = Schuss. Alle 6 Schuss wird nachgeladen. 30 Ziele – sie werden immer schneller.',
+      hint: 'Mit der Maus zielen, <b>Klick</b> = Schuss. Alle 6 Schuss wird nachgeladen. 30 Ziele – sie werden immer schneller, ab dem 10. fliegen sie Kurven, ab dem 20. kommen sie auch von rechts.',
     }, (A, finish) => {
       let T = 0, last = 0, raf = 0, started = false, over = false;
       let idx = 0, hits = 0, ammo = MAG, reloadEnd = 0, cur = null, nextAt = 0.4;
       const hud = {
         hits: el('b', {}, '0'), tgt: el('b', {}, '0'), mag: el('span', { class: 'mag' }), rl: el('span', { class: 'rl' }),
       };
-      A.hud.append(el('div', {}, 'Treffer ', hud.hits, ' / ', String(TOTAL)), el('div', {}, 'Ziel ', hud.tgt, ' / ', String(TOTAL)),
+      A.hud.append(el('div', {}, 'Treffer ', hud.hits, ' / ', String(RANGE_N)), el('div', {}, 'Ziel ', hud.tgt, ' / ', String(RANGE_N)),
         el('div', { class: 'mag-box' }, hud.mag, hud.rl));
       const drawMag = () => {
         hud.mag.replaceChildren(...Array.from({ length: MAG }, (_, i) => el('i', { class: i < ammo ? 'full' : '' })));
@@ -94,13 +102,16 @@ const Training = (() => {
       drawMag();
 
       function spawn() {
-        const dur = 3.4 - 2.3 * (idx / (TOTAL - 1));
+        const k = idx / (RANGE_N - 1);
+        const dur = 2.1 - 1.5 * k;
         const el1 = sprite('train-target-' + (1 + (idx % 3)), 'tr-target', '🕴️');
-        const lane = rf(24, 50);
+        const curvy = idx >= 9;
+        const lane = curvy ? rf(26, 38) : rf(24, 50);
         el1.style.top = lane + '%';
         el1.style.visibility = 'hidden';
         A.layer.append(el1);
-        cur = { el: el1, p: 0, dur, dead: false };
+        const curve = curvy ? { amp: rf(7, 12) + 6 * k, f: rf(0.8, 1.9), ph: rf(0, 6.283) } : null;
+        cur = { el: el1, p: 0, dur, dead: false, dir: idx >= 19 && Math.random() < 0.5 ? -1 : 1, curve };
         idx++; hud.tgt.textContent = idx;
       }
 
@@ -127,7 +138,7 @@ const Training = (() => {
       function end() {
         if (over) return; over = true;
         Sfx.play(hits >= 15 ? 'fanfare' : 'turn');
-        A.say(`Geschafft!<small>${hits} von ${TOTAL} Zielen getroffen</small>`);
+        A.say(`Geschafft!<small>${hits} von ${RANGE_N} Zielen getroffen</small>`);
         finish();
       }
 
@@ -141,20 +152,22 @@ const Training = (() => {
           if (cur.dead) { if (T >= cur.goneAt) { cur.el.remove(); cur = null; nextAt = T + rf(0.35, 0.8); } }
           else {
             cur.p += dt / cur.dur;
-            const sw = A.stage.clientWidth, w = cur.el.offsetWidth;
+            const sw = A.stage.clientWidth, sh = A.stage.clientHeight, w = cur.el.offsetWidth;
             cur.el.style.visibility = '';
-            cur.el.style.transform = `translateX(${-w + cur.p * (sw + w)}px)`;
+            const x = cur.dir > 0 ? -w + cur.p * (sw + w) : sw - cur.p * (sw + w);
+            const y = cur.curve ? Math.sin(cur.curve.ph + cur.p * cur.curve.f * 6.283) * cur.curve.amp / 100 * sh : 0;
+            cur.el.style.transform = `translate(${x}px, ${y}px)`;
             if (cur.p >= 1) { cur.el.remove(); cur = null; nextAt = T + rf(0.35, 0.8); }
           }
         } else if (T >= nextAt) {
-          if (idx >= TOTAL) return end();
+          if (idx >= RANGE_N) return end();
           spawn();
         }
       }
 
       return {
         start() {
-          A.say('Zum Starten klicken<small>Die Ziele kommen von links</small>', 'wait');
+          A.say('Zum Starten klicken<small>Die Ziele werden schnell – ab Ziel 10 fliegen sie Kurven, ab Ziel 20 auch von rechts</small>', 'wait');
           last = performance.now(); raf = requestAnimationFrame(tick);
         },
         click(aim) {
@@ -162,7 +175,7 @@ const Training = (() => {
           shoot(aim);
         },
         stop() { cancelAnimationFrame(raf); },
-        result() { return { hits, total: TOTAL, ended: over }; },
+        result() { return { hits, total: RANGE_N, ended: over }; },
       };
     });
   }
@@ -173,13 +186,14 @@ const Training = (() => {
   function camp(g) {
     const hp0 = Math.max(1, g.en | 0);
     const dmgTop = 2 + Math.round(3 * clamp((hp0 - 10) / 40, 0, 1));
+    const TOTAL = CAMP_N;
     return arena({
       cls: 'camp', title: '🏚️ Trainingslager – Selber trainieren', bg: 'train-camp-bg',
-      hint: 'Du sitzt hinter der Deckung. <b>Klick</b> auf einen Gangster = Schuss – dabei kommst du aus der Deckung und bist <b>verwundbar</b>. Alle 6 Schuss wird 2 s nachgeladen.',
+      hint: 'Du sitzt hinter der Deckung. <b>Klick</b> auf einen Gangster = Schuss – dabei kommst du aus der Deckung und bist <b>verwundbar</b>. Alle 6 Schuss wird 2 s nachgeladen. Ab dem 20. Gegner kommen sie schneller, ab dem 30. schießen sie fast sofort.',
     }, (A, finish) => {
       let T = 0, last = 0, raf = 0, started = false, over = false;
       let hp = hp0, kills = 0, spawned = 0, ammo = MAG, reloadEnd = 0, exposedUntil = 0, nextSpawn = 0.6;
-      let enemy = null, lastWin = -1;
+      let enemies = [], lastWin = -1;
 
       const hud = { hp: el('i'), hpt: el('b', {}, hp + ' / ' + hp0), kills: el('b', {}, '0'), mag: el('span', { class: 'mag' }), rl: el('span', { class: 'rl' }) };
       A.hud.append(
@@ -210,25 +224,33 @@ const Training = (() => {
         A.layer.append(mf); setTimeout(() => mf.remove(), 180);
       }
 
+      /* Schwierigkeit nach laufender Nummer des Gegners (1-basiert) */
+      const fireDelay = n => n >= 30 ? rf(1, 2) : rf(1, 3);
+      const spawnGap = n => n >= 20 ? rf(0.7, 1.3) : rf(1.2, 2);
+      const maxAlive = n => n >= 20 ? 3 : 2;
+
       function spawn() {
-        let wi; do { wi = Math.floor(Math.random() * wins.length); } while (wi === lastWin);
+        const free = wins.map((w, i) => i).filter(i => i !== lastWin && !enemies.some(e => e.wi === i));
+        if (!free.length) return;
+        const wi = free[Math.floor(Math.random() * free.length)];
         lastWin = wi;
         const w = wins[wi];
+        const n = ++spawned;
         const e = sprite('train-enemy-' + (1 + Math.floor(Math.random() * 3)), 'tr-enemy', '🕴️');
         e.style.left = w.x + '%';
         e.style.top = (w.y + CAMP_WINDOWS.h / 2) + '%';
         e.style.height = (CAMP_WINDOWS.h * 1.35) + '%';
         A.layer.append(e);
         requestAnimationFrame(() => e.classList.add('in'));
-        enemy = { el: e, w, fireAt: T + rf(2, 4), dead: false, aimed: false };
-        spawned++;
+        enemies.push({ el: e, w, wi, n, fireAt: T + fireDelay(n), aimed: false });
+        nextSpawn = T + spawnGap(n + 1);
       }
 
-      function enemyFire() {
-        const w = enemy.w;
+      function enemyFire(en) {
+        const w = en.w;
         Sfx.play(Math.random() < 0.5 ? 'burst' : 'gun');
         muzzle(w.x, w.y + 1, true);
-        enemy.aimed = false; enemy.el.classList.remove('aim');
+        en.aimed = false; en.el.classList.remove('aim');
         if (T < exposedUntil) {
           const dmg = 2 + Math.floor(Math.random() * (dmgTop - 2 + 1));
           hp -= dmg; drawHp(); A.bleed(); Sfx.play('hit');
@@ -240,7 +262,7 @@ const Training = (() => {
           const pop = el('div', { class: 'tr-pop safe', style: { left: '50%', top: '72%' } }, 'Deckung!');
           A.layer.append(pop); setTimeout(() => pop.remove(), 700);
         }
-        enemy.fireAt = T + rf(2, 4);
+        en.fireAt = T + fireDelay(en.n);
       }
 
       function shoot(aim) {
@@ -250,16 +272,18 @@ const Training = (() => {
         exposedUntil = T + 0.9; setExposed(true);
         const sr = A.rect();
         muzzle(60.1, 64.7, false);
-        if (enemy && !enemy.dead) {
-          const r = enemy.el.getBoundingClientRect();
+        const target = enemies.find(en => {
+          const r = en.el.getBoundingClientRect();
           const x0 = r.left - sr.left, y0 = r.top - sr.top;
-          if (aim.x > x0 + r.width * 0.1 && aim.x < x0 + r.width * 0.9 && aim.y > y0 && aim.y < y0 + r.height) {
-            enemy.dead = true; enemy.el.classList.remove('aim'); enemy.el.classList.add('down'); kills++; hud.kills.textContent = kills;
-            Sfx.play('kill');
-            const dead = enemy; setTimeout(() => dead.el.remove(), 500);
-            enemy = null; nextSpawn = T + rf(0.8, 1.5);
-            if (kills >= TOTAL) { drawMag(); return end('win'); }
-          }
+          return aim.x > x0 + r.width * 0.1 && aim.x < x0 + r.width * 0.9 && aim.y > y0 && aim.y < y0 + r.height;
+        });
+        if (target) {
+          enemies = enemies.filter(en => en !== target);
+          target.el.classList.remove('aim'); target.el.classList.add('down'); kills++; hud.kills.textContent = kills;
+          Sfx.play('kill');
+          setTimeout(() => target.el.remove(), 500);
+          if (!enemies.length) nextSpawn = Math.min(nextSpawn, T + 0.35);
+          if (kills >= TOTAL) { drawMag(); return end('win'); }
         }
         if (ammo <= 0) { reloadEnd = T + 2; Sfx.play('reload'); }
         drawMag();
@@ -267,7 +291,7 @@ const Training = (() => {
 
       function end(why) {
         if (over) return; over = true;
-        if (enemy) { enemy.el.classList.remove('aim'); }
+        enemies.forEach(en => en.el.classList.remove('aim'));
         if (why === 'dead') { Sfx.play('jail'); A.say(`Getroffen!<small>Die Lebenspunkte sind aufgebraucht – ${kills} von ${TOTAL} Gangstern erledigt</small>`, 'bad'); }
         else { Sfx.play('fanfare'); A.say(`Haus gesäubert!<small>Alle ${TOTAL} Gangster erledigt</small>`); }
         setExposed(false);
@@ -279,18 +303,19 @@ const Training = (() => {
         const dt = Math.min(0.1, (now - last) / 1000); last = now;
         if (!started || over) return;
         T += dt;
-        if (exposedUntil && T >= exposedUntil && !reloadEnd) { exposedUntil = 0; setExposed(false); }
-        else if (exposedUntil && T >= exposedUntil) { exposedUntil = 0; setExposed(false); }
+        if (exposedUntil && T >= exposedUntil) { exposedUntil = 0; setExposed(false); }
         if (reloadEnd && T >= reloadEnd) { reloadEnd = 0; ammo = MAG; Sfx.play('lock'); drawMag(); }
-        if (enemy) {
-          if (!enemy.aimed && T >= enemy.fireAt - 0.45) { enemy.aimed = true; enemy.el.classList.add('aim'); }
-          if (T >= enemy.fireAt) enemyFire();
-        } else if (spawned < TOTAL && T >= nextSpawn) spawn();
+        for (const en of enemies.slice()) {
+          if (over) break;
+          if (!en.aimed && T >= en.fireAt - 0.45) { en.aimed = true; en.el.classList.add('aim'); }
+          if (T >= en.fireAt) enemyFire(en);
+        }
+        if (!over && spawned < TOTAL && enemies.length < maxAlive(spawned + 1) && T >= nextSpawn) spawn();
       }
 
       return {
         start() {
-          A.say('Zum Starten klicken<small>Du hast ' + hp0 + ' Lebenspunkte – die Gangster feuern 2–4 Sekunden nach dem Auftauchen</small>', 'wait');
+          A.say('Zum Starten klicken<small>Du hast ' + hp0 + ' Lebenspunkte – die Gangster feuern 1–3 Sekunden nach dem Auftauchen, später schneller</small>', 'wait');
           last = performance.now(); raf = requestAnimationFrame(tick);
         },
         click(aim) {

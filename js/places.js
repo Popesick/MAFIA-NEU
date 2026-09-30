@@ -200,7 +200,7 @@ async function weaponTrain(p, ln, art) {
   const how = await UI.menu(title, [`Das macht <b>${money(price)}</b>.`,
     camp ? 'Alle Werte steigen kräftig (je +8 bis +15).' : 'Kraft +5, Intelligenz +3, Brutalität +2 (je nach Laden mehr).',
     '<b>Selber trainieren</b> ist ein Minispiel: Je besser du bist, desto größer der Erfolg (0–100 %).'],
-  [{ label: 'Automatisch trainieren', sub: 'Immer der volle Erfolg' }, { label: 'Selber trainieren', sub: camp ? 'Minispiel: 30 Gangster im Haus' : 'Minispiel: 30 Zielscheiben' }],
+  [{ label: 'Automatisch trainieren', sub: 'Immer der volle Erfolg' }, { label: 'Selber trainieren', sub: camp ? 'Minispiel: 40 Gangster im Haus' : 'Minispiel: 30 Zielscheiben' }],
   { art, cancel: 'Lieber nicht' });
   if (!how) return;
   if (!canPay(p, price)) return notEnough();
