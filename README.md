@@ -22,14 +22,14 @@ Die Spielhölle enthält drei echte Minispiele mit dem Geld des Spielers (im Tra
 - **Black Jack** – 4 Decks, Dealer steht bei 17, Black Jack zahlt 3 : 2, Verdoppeln und einmaliges Teilen.
 - **Roulette** – europäisch mit einer Null, Rad-Animation, volles Tableau: Zahlen (35 : 1), Dutzende und Reihen (2 : 1), Rot/Schwarz, Gerade/Ungerade, 1–18/19–36 (1 : 1).
 
-Karten, Jetons und Rad werden im Spiel gezeichnet. Die Tischbilder `casino-poker`, `casino-blackjack` und `casino-roulette` liegen bei; `casino-kartenruecken` (Kartenrückseite) fehlt noch und wird bis dahin als Muster gezeichnet. Die Prompts stehen in [BILDER-PROMPTS.md](BILDER-PROMPTS.md).
+Karten, Jetons und Rad werden im Spiel gezeichnet. Die Tischbilder `casino-poker`, `casino-blackjack`, `casino-roulette` und die Kartenrückseite `casino-kartenruecken` liegen bei. Die Prompts stehen in [BILDER-PROMPTS.md](BILDER-PROMPTS.md).
 
 ## Training beim Waffenhändler
 
 Beim Waffenhändler (Schießtraining und Trainingslager) gibt es neben „Automatisch trainieren“ (voller Erfolg) die Option **„Selber trainieren“** als Minispiel. Der Erfolg wird anteilig (0–100 %) nach Treffern berechnet:
 
-- **Schießstand** – 30 Pappkameraden huschen schnell über einen Schießstand und werden mit jedem Ziel schneller; ab dem 10. Ziel fliegen sie zufällige Kurven, ab dem 20. kommen sie auch von rechts ins Bild. Fadenkreuz mit der Maus, alle 6 Schuss Nachladen mit kurzer Pause.
-- **Trainingslager** – Der Spieler sitzt mit den Lebenspunkten des Gangsters hinter einer Deckung vor einem Haus; in den Fenstern tauchen 40 Gangster auf und schießen nach 1–3 s (ab dem 30. Gegner nur noch 1–2 s). Ab dem 20. Gegner tauchen sie deutlich häufiger auf, teils bis zu drei gleichzeitig. Wer schießt, verlässt die Deckung und ist verwundbar (Mündungsfeuer mit Sound, Nachladen nach 6 Schuss in 2 s). Ein Treffer kostet 2–5 Lebenspunkte; bei 0 ist das Spiel vorbei. Beide Minispiele füllen das Fenster fast komplett aus; per Knopf „⛶ Vollbild“ auch echter Vollbildmodus.
+- **Schießstand** – 30 Pappkameraden huschen über einen Schießstand und werden mit jedem Ziel schneller, ab der Hälfte (15. Ziel) nochmal deutlich; ab dem 10. Ziel fliegen sie zufällige Kurven, ab dem 20. kommen sie auch von rechts ins Bild. Fadenkreuz mit der Maus, alle 6 Schuss Nachladen mit kurzer Pause.
+- **Trainingslager** – Der Spieler sitzt mit den Lebenspunkten des Gangsters hinter einer Deckung vor einem Haus; in den Fenstern tauchen 40 Gangster auf und schießen nach 1–3 s. Ab dem 20. Gegner (der Hälfte) kommen sie häufiger, schneller und bis zu drei gleichzeitig, ab dem 30. schießen sie fast sofort (1–2 s) und bis zu vier stehen gleichzeitig in den Fenstern. Wer schießt, verlässt die Deckung und ist verwundbar (Mündungsfeuer mit Sound, Nachladen nach 6 Schuss in 2 s). Ein Treffer kostet 2–5 Lebenspunkte; bei 0 ist das Spiel vorbei. Beide Minispiele gehen automatisch in den Vollbildmodus (per Knopf „⛶ Vollbild“ auch manuell umschaltbar) und füllen sonst das Fenster fast komplett aus.
 
 Die Figuren `train-target-1..3` sind lokal aus den Gangster-Sprites `train-enemy-1..3` abgeleitet (Pappaufsteller-Look), nicht separat generiert.
 

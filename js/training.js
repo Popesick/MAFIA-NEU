@@ -9,6 +9,7 @@
 
 const Training = (() => {
   const RANGE_N = 30, CAMP_N = 40;
+  const RANGE_HALF = Math.floor(RANGE_N / 2) - 1;
   const MAG = 6;
   const rf = (a, b) => a + Math.random() * (b - a);
   const pickOf = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -73,7 +74,12 @@ const Training = (() => {
     await UI.scene({
       wide: true, title: cfg.title, body: [root], noFocus: true,
       actions: [{ label: 'Training beenden', value: 'quit', kind: 'ghost' }],
-      onMount: (sheet, done) => { sheet.classList.add('tr-fs'); game = build(api, () => setTimeout(done, 2200)); hud.append(fsBtn); game.start(); },
+      onMount: (sheet, done) => {
+        sheet.classList.add('tr-fs'); hud.append(fsBtn);
+        const m = sheet.closest('.modal');
+        if (m && m.requestFullscreen) m.requestFullscreen().catch(() => {});
+        game = build(api, () => setTimeout(done, 2200)); game.start();
+      },
     });
     game.stop();
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
@@ -86,7 +92,7 @@ const Training = (() => {
   function range(g) {
     return arena({
       cls: 'range', title: '🎯 Schießstand – Selber trainieren', bg: 'train-range-bg',
-      hint: 'Mit der Maus zielen, <b>Klick</b> = Schuss. Alle 6 Schuss wird nachgeladen. 30 Ziele – sie werden immer schneller, ab dem 10. fliegen sie Kurven, ab dem 20. kommen sie auch von rechts.',
+      hint: 'Mit der Maus zielen, <b>Klick</b> = Schuss. Alle 6 Schuss wird nachgeladen. 30 Ziele – sie werden immer schneller, ab dem 10. fliegen sie Kurven, ab dem 20. kommen sie auch von rechts, ab der Hälfte legen sie nochmal deutlich zu.',
     }, (A, finish) => {
       let T = 0, last = 0, raf = 0, started = false, over = false;
       let idx = 0, hits = 0, ammo = MAG, reloadEnd = 0, cur = null, nextAt = 0.4;
@@ -101,9 +107,13 @@ const Training = (() => {
       };
       drawMag();
 
+      const gap = () => idx >= RANGE_HALF ? rf(0.15, 0.4) : rf(0.35, 0.8);
+
       function spawn() {
         const k = idx / (RANGE_N - 1);
-        const dur = 2.1 - 1.5 * k;
+        const dur = idx < RANGE_HALF
+          ? 2.3 - 0.9 * (idx / (RANGE_HALF - 1))
+          : 1.3 - 0.85 * ((idx - RANGE_HALF) / (RANGE_N - 1 - RANGE_HALF));
         const el1 = sprite('train-target-' + (1 + (idx % 3)), 'tr-target', '🕴️');
         const curvy = idx >= 9;
         const lane = curvy ? rf(26, 38) : rf(24, 50);
@@ -149,7 +159,7 @@ const Training = (() => {
         T += dt;
         if (reloadEnd && T >= reloadEnd) { reloadEnd = 0; ammo = MAG; Sfx.play('lock'); drawMag(); }
         if (cur) {
-          if (cur.dead) { if (T >= cur.goneAt) { cur.el.remove(); cur = null; nextAt = T + rf(0.35, 0.8); } }
+          if (cur.dead) { if (T >= cur.goneAt) { cur.el.remove(); cur = null; nextAt = T + gap(); } }
           else {
             cur.p += dt / cur.dur;
             const sw = A.stage.clientWidth, sh = A.stage.clientHeight, w = cur.el.offsetWidth;
@@ -157,7 +167,7 @@ const Training = (() => {
             const x = cur.dir > 0 ? -w + cur.p * (sw + w) : sw - cur.p * (sw + w);
             const y = cur.curve ? Math.sin(cur.curve.ph + cur.p * cur.curve.f * 6.283) * cur.curve.amp / 100 * sh : 0;
             cur.el.style.transform = `translate(${x}px, ${y}px)`;
-            if (cur.p >= 1) { cur.el.remove(); cur = null; nextAt = T + rf(0.35, 0.8); }
+            if (cur.p >= 1) { cur.el.remove(); cur = null; nextAt = T + gap(); }
           }
         } else if (T >= nextAt) {
           if (idx >= RANGE_N) return end();
@@ -167,7 +177,7 @@ const Training = (() => {
 
       return {
         start() {
-          A.say('Zum Starten klicken<small>Die Ziele werden schnell – ab Ziel 10 fliegen sie Kurven, ab Ziel 20 auch von rechts</small>', 'wait');
+          A.say('Zum Starten klicken<small>Die Ziele werden schnell – ab Ziel 10 fliegen sie Kurven, ab Ziel 20 auch von rechts, ab Ziel 15 wird es nochmal hektischer</small>', 'wait');
           last = performance.now(); raf = requestAnimationFrame(tick);
         },
         click(aim) {
@@ -189,7 +199,7 @@ const Training = (() => {
     const TOTAL = CAMP_N;
     return arena({
       cls: 'camp', title: '🏚️ Trainingslager – Selber trainieren', bg: 'train-camp-bg',
-      hint: 'Du sitzt hinter der Deckung. <b>Klick</b> auf einen Gangster = Schuss – dabei kommst du aus der Deckung und bist <b>verwundbar</b>. Alle 6 Schuss wird 2 s nachgeladen. Ab dem 20. Gegner kommen sie schneller, ab dem 30. schießen sie fast sofort.',
+      hint: 'Du sitzt hinter der Deckung. <b>Klick</b> auf einen Gangster = Schuss – dabei kommst du aus der Deckung und bist <b>verwundbar</b>. Alle 6 Schuss wird 2 s nachgeladen. Ab dem 20. Gegner (der Hälfte) kommen sie häufiger und schneller, ab dem 30. schießen sie fast sofort und bis zu vier stehen gleichzeitig in den Fenstern.',
     }, (A, finish) => {
       let T = 0, last = 0, raf = 0, started = false, over = false;
       let hp = hp0, kills = 0, spawned = 0, ammo = MAG, reloadEnd = 0, exposedUntil = 0, nextSpawn = 0.6;
@@ -225,9 +235,9 @@ const Training = (() => {
       }
 
       /* Schwierigkeit nach laufender Nummer des Gegners (1-basiert) */
-      const fireDelay = n => n >= 30 ? rf(1, 2) : rf(1, 3);
-      const spawnGap = n => n >= 20 ? rf(0.7, 1.3) : rf(1.2, 2);
-      const maxAlive = n => n >= 20 ? 3 : 2;
+      const fireDelay = n => n >= 30 ? rf(0.8, 1.6) : n >= 20 ? rf(1.1, 2.2) : rf(1.6, 3.2);
+      const spawnGap = n => n >= 30 ? rf(0.5, 0.9) : n >= 20 ? rf(0.75, 1.3) : rf(1.4, 2.3);
+      const maxAlive = n => n >= 30 ? 4 : n >= 20 ? 3 : 2;
 
       function spawn() {
         const free = wins.map((w, i) => i).filter(i => i !== lastWin && !enemies.some(e => e.wi === i));
@@ -315,7 +325,7 @@ const Training = (() => {
 
       return {
         start() {
-          A.say('Zum Starten klicken<small>Du hast ' + hp0 + ' Lebenspunkte – die Gangster feuern 1–3 Sekunden nach dem Auftauchen, später schneller</small>', 'wait');
+          A.say('Zum Starten klicken<small>Du hast ' + hp0 + ' Lebenspunkte – die Gangster feuern 1–3 Sekunden nach dem Auftauchen, ab der Hälfte deutlich schneller und öfter zu mehreren</small>', 'wait');
           last = performance.now(); raf = requestAnimationFrame(tick);
         },
         click(aim) {
