@@ -3,7 +3,7 @@
    ============================================================ */
 
 const COLS = 40, ROWS = 25;
-const VIEW_COLS = 24, VIEW_ROWS = 15;
+const MIN_VIEW_COLS = 14, MIN_VIEW_ROWS = 9;
 const cellOf = (r, c) => r * COLS + c;
 
 const CityMap = {
@@ -38,12 +38,13 @@ const DIRS = { up: -COLS, down: COLS, left: -1, right: 1 };
 const MapView = {
   cs: 36,
   base: null, ctx: null, canvas: null,
+  viewCols: 20, viewRows: 12,
   player: null, hover: -1, path: [], raf: 0, t0: performance.now(), visible: false,
   hilite: null, camR: 0, camC: 0,
 
   init() {
     this.canvas = $('#map');
-    this.canvas.width = VIEW_COLS * this.cs; this.canvas.height = VIEW_ROWS * this.cs;
+    this.canvas.width = this.viewCols * this.cs; this.canvas.height = this.viewRows * this.cs;
     this.ctx = this.canvas.getContext('2d');
     this.buildBase();
     this.canvas.addEventListener('mousemove', e => { this.hover = this.cellAt(e); });
@@ -51,22 +52,35 @@ const MapView = {
     this.canvas.addEventListener('click', e => this.onClick(this.cellAt(e)));
     document.addEventListener('imgchange', () => { });
   },
+  /** Passt die Anzahl sichtbarer Kacheln an den tatsächlich verfügbaren Platz an (Kachelgröße bleibt gleich) */
+  resize() {
+    const wrap = this.canvas.parentElement;
+    const w = wrap.clientWidth;
+    if (!w) return;
+    const top = wrap.getBoundingClientRect().top;
+    const availH = Math.max(200, window.innerHeight - top - 100);
+    const cols = Math.max(MIN_VIEW_COLS, Math.min(COLS, Math.round(w / this.cs)));
+    const rows = Math.max(MIN_VIEW_ROWS, Math.min(ROWS, Math.round(availH / this.cs)));
+    if (cols === this.viewCols && rows === this.viewRows) return;
+    this.viewCols = cols; this.viewRows = rows;
+    this.canvas.width = cols * this.cs; this.canvas.height = rows * this.cs;
+  },
   /** Kamera-Ausschnitt (oben links, in Zellen), zentriert auf 'pos' und ans Kartenende geklemmt */
   camFor(pos) {
     const r = Math.floor(pos / COLS), c = pos % COLS;
     return {
-      camR: Math.max(0, Math.min(ROWS - VIEW_ROWS, r - (VIEW_ROWS >> 1))),
-      camC: Math.max(0, Math.min(COLS - VIEW_COLS, c - (VIEW_COLS >> 1))),
+      camR: Math.max(0, Math.min(ROWS - this.viewRows, r - (this.viewRows >> 1))),
+      camC: Math.max(0, Math.min(COLS - this.viewCols, c - (this.viewCols >> 1))),
     };
   },
   inView(i) {
     const r = Math.floor(i / COLS), c = i % COLS;
-    return r >= this.camR && r < this.camR + VIEW_ROWS && c >= this.camC && c < this.camC + VIEW_COLS;
+    return r >= this.camR && r < this.camR + this.viewRows && c >= this.camC && c < this.camC + this.viewCols;
   },
   cellAt(e) {
     const r = this.canvas.getBoundingClientRect();
-    const x = Math.floor((e.clientX - r.left) / r.width * VIEW_COLS), y = Math.floor((e.clientY - r.top) / r.height * VIEW_ROWS);
-    return x < 0 || y < 0 || x >= VIEW_COLS || y >= VIEW_ROWS ? -1 : cellOf(y + this.camR, x + this.camC);
+    const x = Math.floor((e.clientX - r.left) / r.width * this.viewCols), y = Math.floor((e.clientY - r.top) / r.height * this.viewRows);
+    return x < 0 || y < 0 || x >= this.viewCols || y >= this.viewRows ? -1 : cellOf(y + this.camR, x + this.camC);
   },
 
   /* ---------- statische Ebene ---------- */
@@ -119,11 +133,12 @@ const MapView = {
   /* ---------- dynamische Ebene ---------- */
   draw(now) {
     if (!this.visible) return;
+    this.resize();
     const g = this.ctx, cs = this.cs, t = (now - this.t0) / 1000;
     const P = this.player;
     const { camR, camC } = this.camFor(P ? P.pos : 0);
     this.camR = camR; this.camC = camC;
-    g.drawImage(this.base, camC * cs, camR * cs, VIEW_COLS * cs, VIEW_ROWS * cs, 0, 0, VIEW_COLS * cs, VIEW_ROWS * cs);
+    g.drawImage(this.base, camC * cs, camR * cs, this.viewCols * cs, this.viewRows * cs, 0, 0, this.viewCols * cs, this.viewRows * cs);
     // Eingänge
     g.textAlign = 'center'; g.textBaseline = 'middle';
     for (const [i, d] of CityMap.door) { if (this.inView(i)) this.drawBadge(i, BUILDINGS[d.la], this.hilite === d.la); }

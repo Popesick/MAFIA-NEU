@@ -290,11 +290,21 @@ const UI = {
       const modal = el('div', { class: 'modal' }, sheet);
       root.append(modal);
       requestAnimationFrame(() => modal.classList.add('in'));
+      const PREV_KEYS = ['arrowup', 'arrowleft', 'w', 'a'], NEXT_KEYS = ['arrowdown', 'arrowright', 's', 'd'];
+      const focusables = () => [...actions.querySelectorAll('.btn:not(:disabled)')];
+      const moveSel = dir => {
+        const list = focusables(); if (!list.length) return;
+        const cur = list.indexOf(document.activeElement);
+        const next = list[cur < 0 ? (dir > 0 ? 0 : list.length - 1) : (cur + dir + list.length) % list.length];
+        next.focus({ preventScroll: true });
+      };
       this._keyHandler = e => {
         if (e.ctrlKey || e.metaKey || e.altKey) return;
         if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) && e.key !== 'Enter' && e.key !== 'Escape') return;
         const k = e.key.toLowerCase();
         if (opts.keyHook && opts.keyHook(e)) { return; }
+        if (PREV_KEYS.includes(k)) { e.preventDefault(); e.stopPropagation(); moveSel(-1); return; }
+        if (NEXT_KEYS.includes(k)) { e.preventDefault(); e.stopPropagation(); moveSel(1); return; }
         if (keymap.has(k)) { e.preventDefault(); e.stopPropagation(); done(keymap.get(k)); }
         else if (k === ' ' && keymap.has('enter')) { e.preventDefault(); e.stopPropagation(); done(keymap.get('enter')); }
       };
